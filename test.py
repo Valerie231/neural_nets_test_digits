@@ -14,7 +14,7 @@ def preprocessing(path):
     dataset=[]
     with open(path, "r") as f:
         dataset_raw = f.readlines()
-    for instance in dataset_raw:
+    for instance in dataset_raw: 
         instance=list(map(int, instance[:-1].split(",")))
         instance[:-1]=[el/16 for el in instance[:-1]]
         dataset.append(instance)
@@ -38,7 +38,17 @@ class Network(object):
         weight_sizes=list(zip(self.sizes[1:], self.sizes))
         self.weights = [np.random.rand(el[0], el[1]) for el in weight_sizes]
         self.bias = [np.random.rand(el) for el in self.sizes[1:]]
-        
+    
+    def feedforward(self, input):
+        """
+        neural network applying for our input data
+        """
+        self.layers[0]=input
+        for y in range(1,len(self.sizes)+1):
+            self.layers[y] = sigmoid(np.dot(self.weights[y-1], input) + self.bias[y-1]) 
+
+
+
 
 if __name__=="__main__":
     a=preprocessing("optdigits.tra")
