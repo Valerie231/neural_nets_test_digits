@@ -17,6 +17,9 @@ def preprocessing(path):
     for instance in dataset_raw: 
         instance=list(map(int, instance[:-1].split(",")))
         instance[:-1]=[el/16 for el in instance[:-1]]
+        expected_output = [0]*10
+        expected_output[instance[-1]]=1
+        instance[-1]=expected_output
         dataset.append(instance)
     return dataset
 
