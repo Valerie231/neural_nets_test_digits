@@ -27,17 +27,22 @@ def sigmoid(z):
     """
     return 1.0/(1.0+np.exp(-z))
 
+def sigmoid_prime(z):
+    return (np.exp(-z)*(sigmoid(z)**2))
+
 
 class Network(object):
     def __init__(self, sizes):
         """
         sizes is a list containing the length of each layer
         """
+        self.nr_layers = len(sizes)
         self.sizes = sizes
         self.layers = np.array([np.zeros(i) for i in self.sizes], dtype=object)
         weight_sizes=list(zip(self.sizes[1:], self.sizes))
         self.weights = [np.random.rand(el[0], el[1]) for el in weight_sizes]
         self.bias = [np.random.rand(el) for el in self.sizes[1:]]
+        self.z = np.array([np.zeros(i) for i in self.sizes], dtype=object)
     
     def feedforward(self, input):
         """
@@ -45,8 +50,37 @@ class Network(object):
         """
         self.layers[0]=input
         for y in range(1,len(self.sizes)+1):
-            self.layers[y] = sigmoid(np.dot(self.weights[y-1], input) + self.bias[y-1]) 
+            self.z[y]=np.dot(self.weights[y-1], self.layers[y-1]) + self.bias[y-1]
+            self.layers[y] = sigmoid(self.z[y]) 
 
+    def cost(self, expected_output):
+        """
+        cost function
+        """
+        output=self.layers[-1]
+        cost = 0.5*(output - expected_output)**2/self.sizes[-1]
+        return cost
+    
+
+    def train(self, input, expected_output, learn_rate):
+        """
+        train function
+        """
+        delta_b=[]
+        delta_w=[]
+        self.feedforward(input)
+        cost = self.cost(expected_output)
+        delta = (self.layers[-1]-expected_output)/self.sizes[-1]*sigmoid_prime(self.z[-1])
+        delta_b.append(delta)
+        for i in reversed(range(1, self.nr_layers-1)):
+            delta_w.append(np.dot(self.layers[i-1], delta))
+            delta = np.dot(np.transpose(self.weights[i]), delta) * sigmoid_prime(self.z[i-1])
+            delta_b.append(delta)
+        delta_b=list(reversed(delta_b))
+        delta_w=list(reversed(delta_w))
+        self.bias=self.bias+learn_rate*delta_b
+        self.weights=self.weights+learn_rate*delta_w
+        
 
 
 
