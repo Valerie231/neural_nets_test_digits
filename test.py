@@ -52,7 +52,7 @@ class Network(object):
         neural network applying for our input data
         """
         self.layers[0]=input
-        for y in range(1,len(self.sizes)+1):
+        for y in range(1,len(self.sizes)):
             self.z[y]=np.dot(self.weights[y-1], self.layers[y-1]) + self.bias[y-1]
             self.layers[y] = sigmoid(self.z[y]) 
 
@@ -65,7 +65,7 @@ class Network(object):
         return cost
     
 
-    def train(self, input, expected_output, learn_rate):
+    def backprop(self, input, expected_output, learn_rate):
         """
         train function
         """
@@ -76,6 +76,7 @@ class Network(object):
         delta = (self.layers[-1]-expected_output)/self.sizes[-1]*sigmoid_prime(self.z[-1])
         delta_b.append(delta)
         for i in reversed(range(1, self.nr_layers-1)):
+            print(i)
             delta_w.append(np.dot(self.layers[i-1], delta))
             delta = np.dot(np.transpose(self.weights[i]), delta) * sigmoid_prime(self.z[i-1])
             delta_b.append(delta)
@@ -83,12 +84,22 @@ class Network(object):
         delta_w=list(reversed(delta_w))
         self.bias=self.bias+learn_rate*delta_b
         self.weights=self.weights+learn_rate*delta_w
-        
+        return cost
 
-
-
+    def train(self, dataset, learn_rate):
+        random.shuffle(dataset)
+        for instance in dataset:
+            cost = self.backprop(instance[:-1], instance[-1], learn_rate)
+            print(cost)
+                
+                
 if __name__=="__main__":
-    a=preprocessing("optdigits.tra")
-    print(a[0])
+    data=preprocessing("optdigits.tra")
+    net = Network([64, 20, 10])
+    net.train(data, 0.1)
+
+
+
+
 
 
